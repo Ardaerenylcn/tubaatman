@@ -48,6 +48,28 @@ const run = async () => {
     check("Payload varsayılan nav kaldırıldı", !/nav__link/.test(html));
     check("çalışan bağlantılar var", /href="\/admin\/collections\/products"/.test(html) || labels.includes("Katalog"));
 
+    // --- Gösterge paneli ---
+    check("gösterge paneli render edildi", /class="tadash"/.test(html));
+    check("Analizler başlığı var", /Analizler/.test(html));
+    check("online göstergesi var", /tadash__live/.test(html));
+    check("istatistik kartları var", (html.match(/tastat__label/g) ?? []).length >= 4,
+          `${(html.match(/tastat__label/g) ?? []).length} kart`);
+    check("sparkline çizildi", /tastat__spark/.test(html));
+    check("zaman aralığı seçici var", /tarange__btn/.test(html));
+    check("dağılım panelleri var", (html.match(/tapanel__title/g) ?? []).length >= 5,
+          `${(html.match(/tapanel__title/g) ?? []).length} panel`);
+    check("mahremiyet notu görünüyor", /IP adresi saklanmaz/.test(html));
+
+    // --- Hareket akışı ---
+    check("hareket akışı render edildi", /class="tafeed"/.test(html));
+    check("Hareket Akışı başlığı var", /Hareket Ak/.test(html));
+    check("Öncelik/Tarih sıralaması var", /tasort__btn/.test(html));
+    check("Google kartı var", /Arama Performans/.test(html));
+    check("bağlı değil durumu dürüstçe gösteriliyor",
+          /bağlı değil/i.test(html) || /taquery__list/.test(html));
+    check("uydurma arama verisi yok",
+          !/tuba atman jewelry/.test(html) || /taquery__list/.test(html));
+
     console.log("\n  görünen ana maddeler:");
     labels.forEach((l) => console.log("    -", l));
   } finally {

@@ -7,6 +7,7 @@ import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 
+import { AnalyticsEvents } from "./collections/AnalyticsEvents";
 import { Categories } from "./collections/Categories";
 import { Media } from "./collections/Media";
 import { Messages } from "./collections/Messages";
@@ -27,6 +28,12 @@ export default buildConfig({
     components: {
       // Varsayılan yan barın yerine özel navigasyon
       Nav: "@/components/admin/nav/AdminNav#AdminNav",
+      views: {
+        // Ana sayfa: ziyaretçi analizleri
+        dashboard: {
+          Component: "@/components/admin/dashboard/Dashboard#default",
+        },
+      },
     },
     meta: {
       titleSuffix: " — Tuba Atman Yönetim",
@@ -41,6 +48,7 @@ export default buildConfig({
     Media,
     Pages,
     Users,
+    AnalyticsEvents,
   ],
   globals: [Settings],
   editor: lexicalEditor(),

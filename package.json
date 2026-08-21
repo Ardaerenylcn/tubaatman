@@ -15,7 +15,8 @@
     "test:cart": "node --env-file=.env.local --import tsx scripts/test-cart.ts",
     "test:contact": "node --env-file=.env.local --import tsx scripts/test-contact.ts",
     "seed:samples": "node --env-file=.env.local --import tsx scripts/seed-samples.ts",
-    "test:admin-nav": "node --env-file=.env.local --import tsx scripts/test-admin-nav.ts"
+    "test:admin-nav": "node --env-file=.env.local --import tsx scripts/test-admin-nav.ts",
+    "test:analytics": "node --env-file=.env.local --import tsx scripts/test-analytics.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.88.0",

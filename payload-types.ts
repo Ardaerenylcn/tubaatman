@@ -75,6 +75,7 @@ export interface Config {
     media: Media;
     pages: Page;
     users: User;
+    'analytics-events': AnalyticsEvent;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,6 +91,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'analytics-events': AnalyticsEventsSelect<false> | AnalyticsEventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -415,6 +417,46 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics-events".
+ */
+export interface AnalyticsEvent {
+  id: number;
+  /**
+   * İstemcide üretilen kimlik; süre güncellemesi bununla eşleşir.
+   */
+  eventId: string;
+  sessionId: string;
+  /**
+   * Günlük tuzla hash'lenmiş ziyaretçi kimliği. IP saklanmaz.
+   */
+  visitorHash?: string | null;
+  path: string;
+  title?: string | null;
+  referrer?: string | null;
+  referrerHost?: string | null;
+  /**
+   * Normalleştirilmiş kaynak: google, instagram, doğrudan …
+   */
+  source?: string | null;
+  country?: string | null;
+  region?: string | null;
+  city?: string | null;
+  device?: ('mobile' | 'tablet' | 'desktop') | null;
+  browser?: string | null;
+  os?: string | null;
+  /**
+   * Sayfada geçirilen süre. Ayrılırken güncellenir.
+   */
+  durationMs?: number | null;
+  /**
+   * Oturumun ilk sayfası mı.
+   */
+  isEntry?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -468,6 +510,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: number | User;
+      } | null)
+    | ({
+        relationTo: 'analytics-events';
+        value: number | AnalyticsEvent;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -712,6 +758,30 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics-events_select".
+ */
+export interface AnalyticsEventsSelect<T extends boolean = true> {
+  eventId?: T;
+  sessionId?: T;
+  visitorHash?: T;
+  path?: T;
+  title?: T;
+  referrer?: T;
+  referrerHost?: T;
+  source?: T;
+  country?: T;
+  region?: T;
+  city?: T;
+  device?: T;
+  browser?: T;
+  os?: T;
+  durationMs?: T;
+  isEntry?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

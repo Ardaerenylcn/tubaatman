@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "../globals.css";
 
+import { AnalyticsTracker } from "@/components/site/analytics-tracker";
 import { CartDrawer } from "@/components/site/cart-drawer";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className="flex-1">{children}</div>
           <SiteFooter />
           <CartDrawer />
+          <AnalyticsTracker />
         </CartProvider>
       </body>
     </html>
