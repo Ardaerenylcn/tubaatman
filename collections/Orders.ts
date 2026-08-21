@@ -12,6 +12,18 @@ export const Orders: CollectionConfig = {
     useAsTitle: "orderNumber",
     defaultColumns: ["orderNumber", "status", "total", "createdAt"],
     group: "Satış",
+    components: {
+      views: {
+        // Payload'ın varsayılan listesi yerine özel sipariş ekranı
+        list: { Component: "@/components/admin/orders/OrdersList#default" },
+        // Tüm belge görünümünü özel sipariş detayıyla değiştir
+        edit: {
+          root: {
+            Component: "@/components/admin/orders/detail/OrderDetail#default",
+          },
+        },
+      },
+    },
   },
   fields: [
     {
@@ -62,6 +74,16 @@ export const Orders: CollectionConfig = {
             { name: "email", type: "email", required: true, label: "E-posta" },
             { name: "phone", type: "text", required: true, label: "Telefon" },
           ],
+        },
+        {
+          name: "tcKimlik",
+          type: "text",
+          maxLength: 11,
+          label: "TC Kimlik No",
+          admin: {
+            description:
+              "e-Arşiv fatura düzenlenmesi için gerekebilir. Zorunlu değildir; müşteri vermek istemezse boş bırakılır.",
+          },
         },
       ],
     },
@@ -183,11 +205,129 @@ export const Orders: CollectionConfig = {
       type: "group",
       label: "Kargo",
       fields: [
+        {
+          name: "method",
+          type: "text",
+          label: "Teslimat yöntemi",
+          defaultValue: "Standart Gönderim",
+        },
         { name: "carrier", type: "text", label: "Kargo firması" },
         { name: "trackingNumber", type: "text", label: "Takip numarası" },
         { name: "shippedAt", type: "date", label: "Kargoya veriliş" },
       ],
     },
+    {
+      name: "tags",
+      type: "array",
+      label: "Etiketler",
+      admin: { description: "Siparişi gruplamak için serbest etiketler." },
+      fields: [{ name: "label", type: "text", required: true, label: "Etiket" }],
+    },
+    {
+      name: "timeline",
+      type: "array",
+      label: "Sipariş hareketleri",
+      admin: {
+        description:
+          "Durum değişiklikleri otomatik eklenir. Notlar müşteriye gösterilmez.",
+      },
+      fields: [
+        {
+          type: "row",
+          fields: [
+            {
+              name: "kind",
+              type: "select",
+              required: true,
+              defaultValue: "system",
+              label: "Tür",
+              options: [
+                { label: "Sistem", value: "system" },
+                { label: "Ödeme", value: "payment" },
+                { label: "Kargo", value: "fulfillment" },
+                { label: "Not", value: "note" },
+              ],
+            },
+            { name: "at", type: "date", required: true, label: "Zaman" },
+          ],
+        },
+        { name: "message", type: "text", required: true, label: "Açıklama" },
+        { name: "author", type: "text", label: "Ekleyen" },
+      ],
+    },
     { name: "notes", type: "textarea", label: "Notlar" },
   ],
+  hooks: {
+    beforeChange: [
+      /**
+       * Durum değiştiğinde zaman çizelgesine otomatik kayıt düşer.
+       * Böylece "bu sipariş ne zaman kargoya verildi" sorusunun cevabı
+       * elle not tutulmasına bağlı kalmaz.
+       */
+      async ({ data, originalDoc, operation, req }) => {
+        const STATUS_TEXT: Record<string, string> = {
+          pending: "Sipariş, Ödeme bekliyor olarak işaretlendi",
+          paid: "Sipariş, Ödendi olarak işaretlendi",
+          preparing: "Sipariş, Hazırlanıyor olarak işaretlendi",
+          shipped: "Sipariş, Kargoya verildi olarak işaretlendi",
+          delivered: "Sipariş, Karşılandı olarak işaretlendi",
+          cancelled: "Sipariş iptal edildi",
+          refunded: "Sipariş iade edildi",
+          failed: "Ödeme başarısız oldu",
+        };
+
+        const timeline = [...(data.timeline ?? originalDoc?.timeline ?? [])];
+        const now = new Date().toISOString();
+        const actor = req?.user?.email ?? undefined;
+
+        if (operation === "create") {
+          const who =
+            [data.customer?.firstName, data.customer?.lastName]
+              .filter(Boolean)
+              .join(" ") || "Müşteri";
+          timeline.push({
+            kind: "system",
+            at: data.createdAt ?? now,
+            message: `${who} bir sipariş verdi`,
+          });
+          if (data.status && data.status !== "pending") {
+            timeline.push({
+              kind: data.status === "paid" ? "payment" : "fulfillment",
+              at: data.createdAt ?? now,
+              message: STATUS_TEXT[data.status] ?? `Durum: ${data.status}`,
+            });
+          }
+        } else if (
+          originalDoc &&
+          data.status &&
+          data.status !== originalDoc.status
+        ) {
+          timeline.push({
+            kind:
+              data.status === "paid" || data.status === "refunded"
+                ? "payment"
+                : "fulfillment",
+            at: now,
+            message: STATUS_TEXT[data.status] ?? `Durum: ${data.status}`,
+            author: actor,
+          });
+        }
+
+        if (
+          originalDoc &&
+          data.shipping?.trackingNumber &&
+          data.shipping.trackingNumber !== originalDoc.shipping?.trackingNumber
+        ) {
+          timeline.push({
+            kind: "fulfillment",
+            at: now,
+            message: `Takip numarası eklendi: ${data.shipping.trackingNumber}`,
+            author: actor,
+          });
+        }
+
+        return { ...data, timeline };
+      },
+    ],
+  },
 };

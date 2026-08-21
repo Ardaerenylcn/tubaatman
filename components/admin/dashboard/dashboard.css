@@ -12,7 +12,8 @@
   --ta-up: #15803d;
   --ta-down: #b91c1c;
 
-  padding: 0 0 64px;
+  padding-top: 28px;
+  padding-bottom: 64px;
 }
 
 html[data-theme="dark"] .tadash {
@@ -489,82 +490,6 @@ html[data-theme="dark"] .tadash {
   font-size: 12px;
   text-align: right;
 }
-
-/* --- mağaza hareketleri --- */
-.tafeed__list { list-style: none; margin: 0; padding: 0; }
-
-.tafeed__item {
-  display: flex;
-  align-items: flex-start;
-  gap: 13px;
-  padding: 13px 0;
-  border-bottom: 1px solid var(--theme-elevation-50);
-}
-
-.tafeed__item:last-child { border-bottom: 0; }
-
-.tafeed__dot {
-  width: 8px;
-  height: 8px;
-  margin-top: 6px;
-  flex-shrink: 0;
-  border-radius: 50%;
-}
-
-/* Durum renkleri metin etiketiyle birlikte gelir; renk tek başına anlam taşımaz */
-.tafeed__dot--critical { background: var(--ta-down); }
-.tafeed__dot--warning  { background: #d97706; }
-.tafeed__dot--good     { background: var(--ta-up); }
-.tafeed__dot--info     { background: var(--ta-accent); }
-.tafeed__dot--neutral  { background: var(--theme-elevation-300); }
-
-html[data-theme="dark"] .tafeed__dot--warning { background: #fbbf24; }
-
-.tafeed__body { flex: 1; min-width: 0; }
-
-.tafeed__item-title {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin: 0;
-  font-size: 14.5px;
-  font-weight: 500;
-}
-
-.tafeed__kind {
-  padding: 1px 8px;
-  border: 1px solid var(--theme-elevation-150);
-  border-radius: 999px;
-  color: var(--theme-elevation-600);
-  font-size: 11px;
-  font-weight: 400;
-}
-
-.tafeed__detail {
-  margin: 3px 0 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--theme-elevation-600);
-  font-size: 13px;
-}
-
-.tafeed__meta {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-shrink: 0;
-}
-
-.tafeed__time { color: var(--theme-elevation-500); font-size: 12.5px; }
-
-.tafeed__action {
-  color: var(--ta-accent);
-  font-size: 13px;
-  text-decoration: none;
-}
-
-.tafeed__action:hover { text-decoration: underline; }
 
 .sr-only {
   position: absolute;

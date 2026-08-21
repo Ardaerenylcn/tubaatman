@@ -71,6 +71,7 @@ export interface Config {
     collections: Collection;
     categories: Category;
     orders: Order;
+    payments: Payment;
     messages: Message;
     media: Media;
     pages: Page;
@@ -87,6 +88,7 @@ export interface Config {
     collections: CollectionsSelect<false> | CollectionsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
+    payments: PaymentsSelect<false> | PaymentsSelect<true>;
     messages: MessagesSelect<false> | MessagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -289,6 +291,10 @@ export interface Order {
     lastName: string;
     email: string;
     phone: string;
+    /**
+     * e-Arşiv fatura düzenlenmesi için gerekebilir. Zorunlu değildir; müşteri vermek istemezse boş bırakılır.
+     */
+    tcKimlik?: string | null;
   };
   shippingAddress: {
     line1: string;
@@ -333,10 +339,73 @@ export interface Order {
    */
   contractAcceptedAt?: string | null;
   shipping?: {
+    method?: string | null;
     carrier?: string | null;
     trackingNumber?: string | null;
     shippedAt?: string | null;
   };
+  /**
+   * Siparişi gruplamak için serbest etiketler.
+   */
+  tags?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Durum değişiklikleri otomatik eklenir. Notlar müşteriye gösterilmez.
+   */
+  timeline?:
+    | {
+        kind: 'system' | 'payment' | 'fulfillment' | 'note';
+        at: string;
+        message: string;
+        author?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payments".
+ */
+export interface Payment {
+  id: number;
+  paymentId?: string | null;
+  conversationId?: string | null;
+  order?: (number | null) | Order;
+  customerName?: string | null;
+  customerEmail?: string | null;
+  /**
+   * Ödemeye konu ürünlerin kısa özeti.
+   */
+  itemSummary?: string | null;
+  status: 'success' | 'declined' | 'pending' | 'refunded' | 'cancelled';
+  /**
+   * KURUŞ cinsinden tam sayı.
+   */
+  amount: number;
+  method?: {
+    channel?: ('card' | 'transfer' | 'cod') | null;
+    cardFamily?: string | null;
+    /**
+     * iyzico'dan gelen maskelenmiş değer. Tam kart numarası saklanmaz.
+     */
+    cardLastFour?: string | null;
+    installment?: number | null;
+  };
+  failure?: {
+    code?: string | null;
+    message?: string | null;
+  };
+  /**
+   * Bankanın işlemi sonuçlandırdığı an. Ödeme tarihinden farklı olabilir.
+   */
+  processedAt?: string | null;
   notes?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -496,6 +565,10 @@ export interface PayloadLockedDocument {
         value: number | Order;
       } | null)
     | ({
+        relationTo: 'payments';
+        value: number | Payment;
+      } | null)
+    | ({
         relationTo: 'messages';
         value: number | Message;
       } | null)
@@ -633,6 +706,7 @@ export interface OrdersSelect<T extends boolean = true> {
         lastName?: T;
         email?: T;
         phone?: T;
+        tcKimlik?: T;
       };
   shippingAddress?:
     | T
@@ -678,10 +752,58 @@ export interface OrdersSelect<T extends boolean = true> {
   shipping?:
     | T
     | {
+        method?: T;
         carrier?: T;
         trackingNumber?: T;
         shippedAt?: T;
       };
+  tags?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  timeline?:
+    | T
+    | {
+        kind?: T;
+        at?: T;
+        message?: T;
+        author?: T;
+        id?: T;
+      };
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payments_select".
+ */
+export interface PaymentsSelect<T extends boolean = true> {
+  paymentId?: T;
+  conversationId?: T;
+  order?: T;
+  customerName?: T;
+  customerEmail?: T;
+  itemSummary?: T;
+  status?: T;
+  amount?: T;
+  method?:
+    | T
+    | {
+        channel?: T;
+        cardFamily?: T;
+        cardLastFour?: T;
+        installment?: T;
+      };
+  failure?:
+    | T
+    | {
+        code?: T;
+        message?: T;
+      };
+  processedAt?: T;
   notes?: T;
   updatedAt?: T;
   createdAt?: T;

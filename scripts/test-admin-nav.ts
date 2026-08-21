@@ -67,8 +67,7 @@ const run = async () => {
     check("Google kartı var", /Arama Performans/.test(html));
     check("bağlı değil durumu dürüstçe gösteriliyor",
           /bağlı değil/i.test(html) || /taquery__list/.test(html));
-    check("uydurma arama verisi yok",
-          !/tuba atman jewelry/.test(html) || /taquery__list/.test(html));
+    check("mağaza hareketleri bölümü yok", !/tafeed__list/.test(html));
 
     console.log("\n  görünen ana maddeler:");
     labels.forEach((l) => console.log("    -", l));

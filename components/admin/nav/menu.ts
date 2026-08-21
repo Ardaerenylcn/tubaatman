@@ -6,13 +6,21 @@
  * Bu ayrım bilinçlidir: çalışmayan bir bağlantıyı çalışıyormuş gibi
  * göstermek, panelde gezinen kişiyi yanıltır.
  */
+/** Alt madde; kendi alt maddeleri varsa üçüncü seviye açılır. */
+export type SubItem = {
+  label: string;
+  href?: string;
+  badge?: string;
+  children?: { label: string; href?: string }[];
+};
+
 export type MenuItem = {
   id: string;
   label: string;
   icon: IconName;
   href?: string;
   badge?: string;
-  children?: { label: string; href?: string }[];
+  children?: SubItem[];
 };
 
 export type IconName =
@@ -47,8 +55,24 @@ export const MENU: MenuGroup[] = [
         icon: "receipt",
         children: [
           { label: "Siparişler", href: `${A}/collections/orders` },
-          { label: "Mesajlar", href: `${A}/collections/messages` },
-          { label: "İadeler" },
+          { label: "Hediye Kartı Satışları" },
+          {
+            label: "Ödemeler ve Mali Durum",
+            children: [
+              { label: "Tüm Ödemeler", href: `${A}/collections/payments` },
+              { label: "Makbuzlar" },
+            ],
+          },
+          { label: "POS Ödeme" },
+          {
+            label: "Analizler",
+            children: [
+              { label: "Satış raporu" },
+              { label: "Ürün performansı" },
+              { label: "Ziyaretçi analizi", href: A },
+            ],
+          },
+          { label: "Terk Edilmiş Sepetler" },
         ],
       },
       {

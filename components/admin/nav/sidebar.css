@@ -118,8 +118,9 @@
   transition: transform 160ms ease;
 }
 
-.tanav__chev--open {
-  transform: rotate(90deg);
+/* Açıkken yukarı bakar */
+.tanav__chev--up {
+  transform: rotate(-90deg);
 }
 
 .tanav__sub {
@@ -131,8 +132,19 @@
   gap: 1px;
 }
 
+.tanav__sub--deep {
+  padding-left: 16px;
+  margin-top: 1px;
+}
+
 .tanav__subrow {
   display: flex;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -147,6 +159,10 @@
 .tanav__subrow:hover {
   background: var(--theme-elevation-50);
   color: var(--theme-elevation-1000);
+}
+
+.tanav__subrow--parent {
+  justify-content: space-between;
 }
 
 .tanav__subrow--active {

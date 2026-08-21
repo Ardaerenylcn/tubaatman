@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import type { IconName, MenuGroup } from "./menu";
+import type { IconName, MenuGroup, SubItem } from "./menu";
 
 const ICONS: Record<IconName, React.ComponentType<{ className?: string }>> = {
   home: Home,
@@ -110,7 +110,7 @@ export function Sidebar({ groups }: { groups: MenuGroup[] }) {
                         <span className="tanav__badge">{item.badge}</span>
                       ) : null}
                       <ChevronRight
-                        className={`tanav__chev${expanded ? " tanav__chev--open" : ""}`}
+                        className={`tanav__chev${expanded ? " tanav__chev--up" : ""}`}
                       />
                     </button>
                   ) : (
@@ -135,23 +135,14 @@ export function Sidebar({ groups }: { groups: MenuGroup[] }) {
                   {expandable && expanded ? (
                     <ul className="tanav__sub">
                       {item.children!.map((child) => (
-                        <li key={child.label}>
-                          {child.href ? (
-                            <Link
-                              href={child.href}
-                              className={`tanav__subrow${
-                                isActive(child.href) ? " tanav__subrow--active" : ""
-                              }`}
-                            >
-                              {child.label}
-                            </Link>
-                          ) : (
-                            <span className="tanav__subrow tanav__subrow--todo">
-                              {child.label}
-                              <em>yakında</em>
-                            </span>
-                          )}
-                        </li>
+                        <SubRow
+                          key={child.label}
+                          item={child}
+                          parentId={item.id}
+                          open={open}
+                          setOpen={setOpen}
+                          isActive={isActive}
+                        />
                       ))}
                     </ul>
                   ) : null}
@@ -162,5 +153,88 @@ export function Sidebar({ groups }: { groups: MenuGroup[] }) {
         </div>
       ))}
     </div>
+  );
+}
+
+
+/** Alt madde. Kendi alt maddeleri varsa üçüncü seviye olarak açılır. */
+function SubRow({
+  item,
+  parentId,
+  open,
+  setOpen,
+  isActive,
+}: {
+  item: SubItem;
+  parentId: string;
+  open: Record<string, boolean>;
+  setOpen: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  isActive: (href?: string) => boolean;
+}) {
+  const key = `${parentId}:${item.label}`;
+  const expandable = Boolean(item.children?.length);
+  const expanded = Boolean(open[key]);
+  const active =
+    isActive(item.href) || Boolean(item.children?.some((c) => isActive(c.href)));
+
+  if (expandable) {
+    return (
+      <li>
+        <button
+          type="button"
+          aria-expanded={expanded}
+          onClick={() => setOpen((p) => ({ ...p, [key]: !p[key] }))}
+          className={`tanav__subrow tanav__subrow--parent${
+            active ? " tanav__subrow--active" : ""
+          }`}
+        >
+          <span>{item.label}</span>
+          <ChevronRight
+            className={`tanav__chev${expanded ? " tanav__chev--up" : ""}`}
+          />
+        </button>
+        {expanded ? (
+          <ul className="tanav__sub tanav__sub--deep">
+            {item.children!.map((c) => (
+              <li key={c.label}>
+                {c.href ? (
+                  <Link
+                    href={c.href}
+                    className={`tanav__subrow${
+                      isActive(c.href) ? " tanav__subrow--active" : ""
+                    }`}
+                  >
+                    {c.label}
+                  </Link>
+                ) : (
+                  <span className="tanav__subrow tanav__subrow--todo">
+                    {c.label}
+                    <em>yakında</em>
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </li>
+    );
+  }
+
+  return (
+    <li>
+      {item.href ? (
+        <Link
+          href={item.href}
+          className={`tanav__subrow${active ? " tanav__subrow--active" : ""}`}
+        >
+          {item.label}
+        </Link>
+      ) : (
+        <span className="tanav__subrow tanav__subrow--todo">
+          {item.label}
+          <em>yakında</em>
+        </span>
+      )}
+    </li>
   );
 }

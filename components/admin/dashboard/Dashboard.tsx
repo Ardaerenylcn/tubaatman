@@ -1,6 +1,6 @@
+import { Gutter } from "@payloadcms/ui";
 import type { AdminViewServerProps } from "payload";
 
-import { getActivity, sortActivity } from "@/lib/activity";
 import { getSearchPerformance } from "@/lib/search-console";
 import {
   getBreakdown,
@@ -87,10 +87,7 @@ export default async function Dashboard(props: AdminViewServerProps) {
       getJourneys(10),
     ]);
 
-  const [activity, search] = await Promise.all([
-    getActivity(),
-    getSearchPerformance(),
-  ]);
+  const search = await getSearchPerformance();
 
   const dayLabels = series.map((s) =>
     new Date(s.day).toLocaleDateString("tr-TR", { day: "numeric", month: "short" }),
@@ -101,7 +98,7 @@ export default async function Dashboard(props: AdminViewServerProps) {
   const hasData = summary.pageviews > 0;
 
   return (
-    <div className="tadash">
+    <Gutter className="tadash">
       <header className="tadash__head">
         <div>
           <h1 className="tadash__title">
@@ -130,7 +127,7 @@ export default async function Dashboard(props: AdminViewServerProps) {
         </section>
       ) : null}
 
-      <ActivityFeed items={sortActivity(activity, sort)} sort={sort} search={search} />
+      <ActivityFeed sort={sort} search={search} />
 
       <section className="tadash__stats">
         <StatCard
@@ -271,6 +268,6 @@ export default async function Dashboard(props: AdminViewServerProps) {
           )}
         </section>
       </div>
-    </div>
+    </Gutter>
   );
 }

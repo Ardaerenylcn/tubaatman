@@ -16,7 +16,10 @@
     "test:contact": "node --env-file=.env.local --import tsx scripts/test-contact.ts",
     "seed:samples": "node --env-file=.env.local --import tsx scripts/seed-samples.ts",
     "test:admin-nav": "node --env-file=.env.local --import tsx scripts/test-admin-nav.ts",
-    "test:analytics": "node --env-file=.env.local --import tsx scripts/test-analytics.ts"
+    "test:analytics": "node --env-file=.env.local --import tsx scripts/test-analytics.ts",
+    "test:orders": "node --env-file=.env.local --import tsx scripts/test-orders-view.ts",
+    "test:payments": "node --env-file=.env.local --import tsx scripts/test-payments-view.ts",
+    "test:order-detail": "node --env-file=.env.local --import tsx scripts/test-order-detail.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.88.0",

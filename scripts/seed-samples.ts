@@ -208,6 +208,24 @@ const run = async () => {
       await payload.delete({ collection: "products", id: p.id });
     }
 
+    const payments = await payload.find({
+      collection: "payments",
+      where: { notes: { like: MARK } },
+      limit: 500,
+    });
+    for (const pay of payments.docs) {
+      await payload.delete({ collection: "payments", id: pay.id });
+    }
+
+    const orders = await payload.find({
+      collection: "orders",
+      where: { notes: { like: MARK } },
+      limit: 500,
+    });
+    for (const o of orders.docs) {
+      await payload.delete({ collection: "orders", id: o.id });
+    }
+
     const media = await payload.find({
       collection: "media",
       where: { alt: { like: MARK } },
@@ -218,7 +236,7 @@ const run = async () => {
     }
 
     console.log(
-      `Temizlendi: ${products.docs.length} örnek ürün, ${media.docs.length} yer tutucu görsel, kapaklar, slider ve atölye bölümü.`,
+      `Temizlendi: ${products.docs.length} örnek ürün, ${orders.docs.length} örnek sipariş, ${payments.docs.length} örnek ödeme, ${media.docs.length} yer tutucu görsel, kapaklar, slider ve atölye bölümü.`,
     );
     process.exit(0);
   }
@@ -347,6 +365,172 @@ const run = async () => {
     },
   });
   console.log("  slider (3 kare) ve atölye bölümü eklendi");
+
+  // ---- Örnek siparişler ----
+  const CUSTOMERS = [
+    ["Çiğdem", "Akkaya", "cigdem@example.invalid", "0532 111 22 33", "Kadıköy", "İstanbul"],
+    ["Selvi Başak", "Öztürk", "selvi@example.invalid", "0533 222 33 44", "Çankaya", "Ankara"],
+    ["Özge", "Kara", "ozge@example.invalid", "0534 333 44 55", "Konak", "İzmir"],
+    ["Eren", "Turgut", "eren@example.invalid", "0535 444 55 66", "Nilüfer", "Bursa"],
+    ["Serra", "Faracı", "serra@example.invalid", "0536 555 66 77", "Muratpaşa", "Antalya"],
+    ["Sibel", "Kişnişçi", "sibel@example.invalid", "0537 666 77 88", "Beşiktaş", "İstanbul"],
+    ["Hatice", "Taşdemir", "hatice@example.invalid", "0538 777 88 99", "Şahinbey", "Gaziantep"],
+    ["Merve", "Yıldırım", "merve@example.invalid", "0539 888 99 00", "Selçuklu", "Konya"],
+  ] as const;
+
+  const STATUSES = [
+    "delivered", "delivered", "shipped", "shipped",
+    "preparing", "paid", "paid", "pending",
+    "delivered", "cancelled", "delivered", "refunded", "delivered",
+  ] as const;
+
+  const allProducts = await payload.find({ collection: "products", limit: 100 });
+  const pickable = allProducts.docs.filter((d) => !d.hasVariants && typeof d.basePrice === "number");
+
+  const existingOrders = await payload.find({
+    collection: "orders",
+    where: { notes: { like: MARK } },
+    limit: 1,
+  });
+
+  if (existingOrders.docs.length === 0 && pickable.length > 0) {
+    for (let i = 0; i < STATUSES.length; i++) {
+      const c = CUSTOMERS[i % CUSTOMERS.length];
+      const itemCount = (i % 3) + 1;
+      const items = [];
+      let subtotal = 0;
+      for (let k = 0; k < itemCount; k++) {
+        const prod = pickable[(i + k) % pickable.length];
+        const qty = k === 0 ? 1 : ((i + k) % 2) + 1;
+        const unit = prod.basePrice as number;
+        const line = unit * qty;
+        subtotal += line;
+        items.push({
+          product: prod.id,
+          titleSnapshot: prod.title,
+          unitPrice: unit,
+          quantity: qty,
+          lineTotal: line,
+        });
+      }
+      const shippingCost = subtotal >= 500000 ? 0 : 15000;
+      // Tarihleri geriye doğru dağıt
+      const daysAgo = i * 3 + (i % 4);
+      const created = new Date(Date.now() - daysAgo * 86400_000 - i * 3600_000);
+
+      await payload.create({
+        collection: "orders",
+        data: {
+          orderNumber: `#${10013 - i}`,
+          status: STATUSES[i],
+          customer: { firstName: c[0], lastName: c[1], email: c[2], phone: c[3] },
+          shippingAddress: { line1: `${c[4]} Mah. Örnek Sok. No:${i + 3}`, district: c[4], city: c[5] },
+          billingSameAsShipping: true,
+          items,
+          subtotal,
+          shippingCost,
+          total: subtotal + shippingCost,
+          contractAcceptedAt: created.toISOString(),
+          notes: `Örnek sipariş ${MARK}`,
+          createdAt: created.toISOString(),
+        },
+      });
+    }
+    console.log(`  ${STATUSES.length} örnek sipariş eklendi`);
+  } else {
+    console.log("  örnek siparişler zaten var, atlandı");
+  }
+
+  // ---- Örnek ödeme işlemleri ----
+  const existingPayments = await payload.find({
+    collection: "payments",
+    where: { notes: { like: MARK } },
+    limit: 1,
+  });
+
+  if (existingPayments.docs.length === 0) {
+    const seededOrders = await payload.find({
+      collection: "orders",
+      where: { notes: { like: MARK } },
+      sort: "-createdAt",
+      limit: 50,
+      depth: 0,
+    });
+
+    const CARDS = [
+      ["Bonus", "4242"], ["World", "5528"], ["Maximum", "9014"],
+      ["Axess", "3317"], ["Paraf", "7788"],
+    ] as const;
+    const DECLINE_REASONS = [
+      ["10051", "Yetersiz bakiye"],
+      ["10005", "İşlem onaylanmadı"],
+      ["10012", "Kart 3D Secure doğrulamasını geçemedi"],
+      ["10041", "Kart kullanıma kapalı"],
+    ] as const;
+
+    let created = 0;
+
+    // Başarılı ödemeler: her ödenmiş siparişe bir işlem
+    for (const [i, o] of seededOrders.docs.entries()) {
+      const paidLike = ["paid", "preparing", "shipped", "delivered"].includes(o.status ?? "");
+      if (!paidLike) continue;
+      const card = CARDS[i % CARDS.length];
+      const at = new Date(o.createdAt);
+      await payload.create({
+        collection: "payments",
+        data: {
+          paymentId: `iyz-${100000 + i}`,
+          conversationId: o.orderNumber,
+          order: o.id,
+          customerName: `${o.customer?.firstName ?? ""} ${o.customer?.lastName ?? ""}`.trim(),
+          customerEmail: o.customer?.email,
+          itemSummary: (o.items ?? []).map((it) => it.titleSnapshot).join(", ").replace(/ \[ÖRNEK\]/g, ""),
+          status: o.status === "refunded" ? "refunded" : "success",
+          amount: o.total,
+          method: {
+            channel: "card",
+            cardFamily: card[0],
+            cardLastFour: card[1],
+            installment: i % 4 === 0 ? 3 : 1,
+          },
+          processedAt: new Date(at.getTime() + 3 * 60_000).toISOString(),
+          notes: `Örnek ödeme ${MARK}`,
+          createdAt: at.toISOString(),
+        },
+      });
+      created++;
+    }
+
+    // Reddedilen denemeler — gerçek hayatta olur, ekranda görünmeli
+    for (let i = 0; i < 6; i++) {
+      const o = seededOrders.docs[i % Math.max(1, seededOrders.docs.length)];
+      const card = CARDS[(i + 2) % CARDS.length];
+      const reason = DECLINE_REASONS[i % DECLINE_REASONS.length];
+      const at = new Date(Date.now() - (i * 5 + 1) * 86400_000 - i * 900_000);
+      await payload.create({
+        collection: "payments",
+        data: {
+          paymentId: `iyz-fail-${200000 + i}`,
+          conversationId: `${o?.orderNumber ?? "#0"}-deneme`,
+          customerName: `${o?.customer?.firstName ?? "Müşteri"} ${o?.customer?.lastName ?? ""}`.trim(),
+          customerEmail: o?.customer?.email,
+          itemSummary: (o?.items ?? []).map((it) => it.titleSnapshot).join(", ").replace(/ \[ÖRNEK\]/g, "") || "Sepet",
+          status: "declined",
+          amount: o?.total ?? 490000,
+          method: { channel: "card", cardFamily: card[0], cardLastFour: card[1], installment: 1 },
+          failure: { code: reason[0], message: reason[1] },
+          processedAt: at.toISOString(),
+          notes: `Örnek ödeme ${MARK}`,
+          createdAt: at.toISOString(),
+        },
+      });
+      created++;
+    }
+
+    console.log(`  ${created} örnek ödeme işlemi eklendi`);
+  } else {
+    console.log("  örnek ödemeler zaten var, atlandı");
+  }
 
   console.log(`\n${n} örnek ürün eklendi. Temizlemek için: npm run seed:samples -- --clean`);
   process.exit(0);

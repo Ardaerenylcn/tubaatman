@@ -21,6 +21,9 @@ import { StrikethroughFeatureClient as StrikethroughFeatureClient_e70f5e05f09f93
 import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { default as default_21e5c7cc632abc240645f5db59dab79a } from '@/components/admin/orders/detail/OrderDetail'
+import { default as default_3758853b616cba0c949a25cbc1eb78a3 } from '@/components/admin/orders/OrdersList'
+import { default as default_cdda3453d4f1fdc007ba5aab86df2e0f } from '@/components/admin/payments/PaymentsList'
 import { AdminNav as AdminNav_dc4fd4746f7f98760676e52d2bbade6c } from '@/components/admin/nav/AdminNav'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 import { default as default_7292b30784a9facdd561e1771398a1a5 } from '@/components/admin/dashboard/Dashboard'
@@ -51,6 +54,9 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UnderlineFeatureClient": UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@/components/admin/orders/detail/OrderDetail#default": default_21e5c7cc632abc240645f5db59dab79a,
+  "@/components/admin/orders/OrdersList#default": default_3758853b616cba0c949a25cbc1eb78a3,
+  "@/components/admin/payments/PaymentsList#default": default_cdda3453d4f1fdc007ba5aab86df2e0f,
   "@/components/admin/nav/AdminNav#AdminNav": AdminNav_dc4fd4746f7f98760676e52d2bbade6c,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
   "@/components/admin/dashboard/Dashboard#default": default_7292b30784a9facdd561e1771398a1a5,

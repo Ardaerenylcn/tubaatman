@@ -13,6 +13,7 @@ import { Media } from "./collections/Media";
 import { Messages } from "./collections/Messages";
 import { Orders } from "./collections/Orders";
 import { Pages } from "./collections/Pages";
+import { Payments } from "./collections/Payments";
 import { ProductCollections } from "./collections/ProductCollections";
 import { Products } from "./collections/Products";
 import { Users } from "./collections/Users";
@@ -44,6 +45,7 @@ export default buildConfig({
     ProductCollections,
     Categories,
     Orders,
+    Payments,
     Messages,
     Media,
     Pages,
