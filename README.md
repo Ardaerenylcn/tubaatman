@@ -71,6 +71,25 @@ varsa SDK OIDC yoluna geçer ve eski bir store'a yazabilir.
 **`"type": "module"` gereklidir.** Payload ESM'dir; `create-next-app` bu alanı
 koymaz ve olmadan `ERR_REQUIRE_ASYNC_MODULE` alınır.
 
+## Deploy
+
+`main` dalına yapılan her push production deploy'u tetikler.
+
+**Commit yazarının e-postası geçerli olmalıdır.** Vercel, commit yazarını
+GitHub hesabıyla eşleştiremezse deployment'ı **build başlamadan bloklar** ve
+CLI'da yalnızca `UNKNOWN` durumu görünür — log dönmez, sebep yalnızca panelde
+yazar. Bu depo için doğru ayar zaten yapılmıştır:
+
+```bash
+git config --local user.email "143708462+Ardaerenylcn@users.noreply.github.com"
+```
+
+Yeni bir makinede çalışırken ya da global ayarınız bozuksa kontrol edin:
+
+```bash
+git log -1 --pretty='%an <%ae>'
+```
+
 ## Yayın öncesi tamamlanması gerekenler
 
 - [ ] KVKK, Gizlilik, Mesafeli Satış ve Teslimat/İade metinleri (şu an **boş**)
