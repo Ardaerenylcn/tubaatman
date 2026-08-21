@@ -1,0 +1,179 @@
+/*
+ * Yönetim paneli yan barı.
+ * Payload'ın kendi tema değişkenleri kullanılır (--theme-elevation-*),
+ * böylece açık ve koyu temada kendiliğinden doğru görünür.
+ */
+.tanav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0 24px;
+}
+
+.tanav__fav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  margin: 0 0 16px;
+  padding: 8px 16px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--theme-elevation-800);
+  font-size: 14px;
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.tanav__fav-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.tanav__group + .tanav__group {
+  margin-top: 4px;
+}
+
+.tanav__rule {
+  border: 0;
+  border-top: 1px solid var(--theme-elevation-100);
+  margin: 12px 0;
+}
+
+.tanav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.tanav__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--theme-elevation-800);
+  font-size: 15px;
+  line-height: 1.3;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.tanav__row:hover {
+  background: var(--theme-elevation-50);
+  color: var(--theme-elevation-1000);
+}
+
+.tanav__row--active {
+  background: var(--theme-elevation-100);
+  color: var(--theme-elevation-1000);
+}
+
+.tanav__row--todo {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.tanav__row--todo:hover {
+  background: transparent;
+}
+
+.tanav__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.tanav__label {
+  flex: 1;
+  min-width: 0;
+}
+
+.tanav__badge {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--theme-warning-500, #eab308);
+  color: #1a1a1a;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.tanav__chev {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: transform 160ms ease;
+}
+
+.tanav__chev--open {
+  transform: rotate(90deg);
+}
+
+.tanav__sub {
+  list-style: none;
+  margin: 2px 0 6px;
+  padding: 0 0 0 42px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.tanav__subrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 5px;
+  color: var(--theme-elevation-650);
+  font-size: 14px;
+  text-decoration: none;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.tanav__subrow:hover {
+  background: var(--theme-elevation-50);
+  color: var(--theme-elevation-1000);
+}
+
+.tanav__subrow--active {
+  background: var(--theme-elevation-100);
+  color: var(--theme-elevation-1000);
+  font-weight: 500;
+}
+
+.tanav__subrow--todo {
+  opacity: 0.42;
+  cursor: default;
+}
+
+.tanav__subrow--todo:hover {
+  background: transparent;
+}
+
+.tanav__subrow em {
+  font-style: normal;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tanav__row,
+  .tanav__subrow,
+  .tanav__chev {
+    transition: none;
+  }
+}

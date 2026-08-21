@@ -24,6 +24,10 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
+    components: {
+      // Varsayılan yan barın yerine özel navigasyon
+      Nav: "@/components/admin/nav/AdminNav#AdminNav",
+    },
     meta: {
       titleSuffix: " — Tuba Atman Yönetim",
     },
