@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# tubaatman.com
 
-## Getting Started
+Tuba Atman Design Studio için el yapımı takı e-ticaret sitesi.
+Wix Stores'tan Next.js + Vercel'e tam yeniden inşa.
 
-First, run the development server:
+- **Canlı:** https://tubaatman.vercel.app
+- **Yönetim paneli:** https://tubaatman.vercel.app/admin
+
+## Stack
+
+| Katman | Teknoloji |
+|---|---|
+| Uygulama | Next.js 16 (App Router), TypeScript, Tailwind v4, shadcn/ui |
+| İçerik & ürün yönetimi | Payload CMS 3 (gömülü `/admin`, arayüz Türkçe) |
+| Veritabanı | Neon Postgres (fra1) |
+| Görseller | Vercel Blob (fra1, **public** store) |
+| Ödeme | iyzico Checkout Form *(Faz 4 — henüz yok)* |
+| E-posta | Resend *(Faz 5 — henüz yok)* |
+
+## Kurulum
 
 ```bash
+npm install
+vercel link            # ardaerenylcns-projects/tubaatman
+vercel env pull .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+İlk açılışta `/admin` adresinde yönetici hesabı oluşturulması istenir.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Komutlar
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Komut | Açıklama |
+|---|---|
+| `npm run dev` | Geliştirme sunucusu |
+| `npm run build` | Üretim derlemesi |
+| `npm run seed` | Kategori, koleksiyon ve içerik sayfalarını oluşturur (idempotent) |
+| `npm run seed:samples` | Tasarımı değerlendirmek için örnek ürün + slider verisi |
+| `npm run seed:samples -- --clean` | Örnek veriyi tamamen siler |
+| `npm run test:cart` | Sepet fiyatlandırma ve stok güvenliği testleri |
+| `npm run test:contact` | İletişim formu doğrulama testleri |
+| `npm run generate:types` | Payload şemasından TypeScript tipleri üretir |
 
-## Learn More
+> Node betikleri `.env.local`'i kendiliğinden okumaz; komutlar
+> `node --env-file=.env.local` ile sarılmıştır. Yeni betik eklerken aynısını yapın.
 
-To learn more about Next.js, take a look at the following resources:
+## Bilmeniz gereken kararlar
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Para kuruş cinsinden integer tutulur.** `790000` = 7.900,00 TL. Float ile para
+taşımak yuvarlama hatası üretir. Biçimlendirme yalnızca ekrana basarken,
+`lib/format.ts` üzerinden yapılır.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Sepette fiyat istemcide tutulmaz.** Tarayıcı yalnızca ürün kimliği, varyant ve
+adet gönderir. Fiyat ve stok her seferinde sunucuda, veritabanından yeniden
+hesaplanır (`app/actions/cart.ts`). İstemciden gelen fiyat bilgisi yok sayılır.
 
-## Deploy on Vercel
+**URL'ler yayındaki Wix sitesiyle birebir aynı.** `/kelt`, `/kolye`, `/cosmos`…
+Slug değiştirmek Google'da indekslenmiş adresleri ve SEO değerini kaybettirir.
+Tek segmentli adresler sırayla kategori → koleksiyon → içerik sayfası olarak
+çözümlenir (`app/(frontend)/[slug]/page.tsx`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Slug üretimi Türkçe'ye duyarlı.** `lib/slug.ts` harfleri silmez, çevirir:
+"Düş Kapanı Küpe" → `dus-kapani-kupe`. Küçültme işlemi harf değişiminden sonra
+yapılır; aksi halde `İ` harfi birleşen nokta içeren bozuk bir slug üretir
+(yayındaki sitedeki `deni̇z-kabuklari` adresi bu hatanın sonucudur).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Blob store public olmak zorunda.** Erişim modu store oluşturulurken belirlenir
+ve **sonradan değiştirilemez**. `.env.local` içinde `BLOB_STORE_ID` bulunmamalı —
+varsa SDK OIDC yoluna geçer ve eski bir store'a yazabilir.
+
+**`"type": "module"` gereklidir.** Payload ESM'dir; `create-next-app` bu alanı
+koymaz ve olmadan `ERR_REQUIRE_ASYNC_MODULE` alınır.
+
+## Yayın öncesi tamamlanması gerekenler
+
+- [ ] KVKK, Gizlilik, Mesafeli Satış ve Teslimat/İade metinleri (şu an **boş**)
+- [ ] Satıcı bilgileri: ticari unvan, adres, vergi dairesi/no, MERSİS
+- [ ] iyzico üretim anahtarları ve panelde webhook adresi
+- [ ] Gerçek ürün ve fotoğrafların girilmesi, örnek verinin temizlenmesi
+- [ ] `tubaatman.com` DNS'inin Wix'ten Vercel'e taşınması
+- [ ] Wix aboneliği, geçiş doğrulanana kadar kapatılmamalı
